@@ -31,6 +31,7 @@ public class BattleSystems : MonoBehaviour
     public BattlePlatform enemyHud;
 
     public BattleState states;
+    private System.Random rnd = new System.Random();
 
     // Start is called before the first frame update
     void Start()
@@ -218,103 +219,131 @@ public class BattleSystems : MonoBehaviour
             // 3. Changeing to players turn
             states = BattleState.PLAYERTURN;
             PlayerTurn();
+            yield break;
         }
         if (enemyUnit.isOnFire) // where the enemy takes damage from being on fire
+        {
+            encounterTxt.text = enemyUnit.Unitname + " is being burnt by fire";
+            enemyUnit.TakeDamage(playerUnit.burningDmg);
+            if (enemyUnit.burningTurnsLeft > 0)
             {
-                encounterTxt.text = enemyUnit.Unitname + " is being burnt by fire";
-                enemyUnit.TakeDamage(playerUnit.burningDmg);
-                if (enemyUnit.burningTurnsLeft > 0)
+                enemyUnit.burningTurnsLeft--;
+                if (enemyUnit.burningTurnsLeft == 0)
                 {
-                    enemyUnit.burningTurnsLeft--;
-                    if (enemyUnit.burningTurnsLeft == 0)
-                    {
-                        enemyUnit.isOnFire = false;
-                        enemyFlameIcon.SetActive(false);
-                    }
+                    enemyUnit.isOnFire = false;
+                    enemyFlameIcon.SetActive(false);
                 }
             }
+        }
         if (enemyUnit.isFrozen) // where the enemy takes damage from being frozen
+        {
+            encounterTxt.text = enemyUnit.Unitname + " is being Frozen By Ice";
+            enemyUnit.TakeDamage(playerUnit.freezingDmg);
+
+            yield return new WaitForSeconds(2.0f);
+
+            if (enemyUnit.freezingTurnsLeft > 0)
+            {
+                enemyUnit.freezingTurnsLeft--;
+                if (enemyUnit.freezingTurnsLeft == 0)
                 {
-                    encounterTxt.text = enemyUnit.Unitname + " is being Frozen By Ice";
-                    enemyUnit.TakeDamage(playerUnit.freezingDmg);
-
-                    yield return new WaitForSeconds(2.0f);
-
-                    if (enemyUnit.freezingTurnsLeft > 0)
-                    {
-                        enemyUnit.freezingTurnsLeft--;
-                        if (enemyUnit.freezingTurnsLeft == 0)
-                        {
-                            enemyUnit.isFrozen = false;
-                            enemyIceIcon.SetActive(false);
-                        }
-                    }
+                    enemyUnit.isFrozen = false;
+                    enemyIceIcon.SetActive(false);
                 }
+            }
+        }
+        else
+            encounterTxt.text = "No Ailments";
 
         // 2. Main Round - Enemy Logic
 
-        // --Attack Section--
+        // --AI Section--
         //CHECKLIST:
 
-        // Flee
-        //1.if No Mana && Hp lower then 5 ? Attempt to flee : move to Heal Section
-
-        // Need Heal?
-        //2.check to see if hp is above 5 ?
-        //  check to see if enemy has enough mana to use Heal ? Heal : move to Abilities Section
-
-        // Abilities Available?
-        //3.check to see if enemy has enough mana to use abilities ? use a random ability
-        //  : move to Attack Section
-
-        // Attack or Defend
-        //4.if health is lower then 50% ? randomize Attack and Defence
-        //  : Attack
-
-
-        //-Attack-
-        encounterTxt.text = enemyUnit.Unitname + " Attacks";
-        yield return new WaitForSeconds(1.0f);
-        bool isDead = playerUnit.TakeDamage(enemyUnit.dmg);
-        playerHud.HpSet(playerUnit.currentHp);
-        yield return new WaitForSeconds(1.0f);
-
-        //-Heal-
-        //add logic for if Hp is getting low, to use heal
-        enemyUnit.Heal(25);
-        enemyHud.HpSet(enemyUnit.currentHp);
-        encounterTxt.text = "The Enemy Healed!";
-        yield return new WaitForSeconds(2.0f);
-
-        //-Defend-
-        // add logic for random use of defend
-        enemyUnit.isDefending = true;
-        encounterTxt.text = "Enemy Gets Into A Defencive Position!";
-        yield return new WaitForSeconds(2.0f);
-
-        //--Abilities--
-
-        //-Fire Blast-
-        StartCoroutine(EnemyFireBlast());
-
-        //Wind Blast
-        StartCoroutine(EnemyWindCannon());
-
-        //Ice Pistol
-        StartCoroutine(EnemyIcePistol());
-
-        encounterTxt.text = "Please Choose An Action:";
-
-        if (isDead)
+        // 1.Flee
+        if (enemyUnit.currentHp <= 5 && enemyUnit.currentMp < enemyUnit.healMpCost)
         {
-            states = BattleState.LOST;
+            //Enemy Attempts to flee
+            states = BattleState.WON;
             EndBattle();
         }
-        
+
+        // 2.Heal
+        if (enemyUnit.currentHp <= 5)
+        {
+            //-Heal-
+            encounterTxt.text = "The Enemy Used Healed and regained 25 Hp";
+            yield return new WaitForSeconds(1.0f);
+            enemyUnit.Heal(25);
+            enemyHud.HpSet(enemyUnit.currentHp);
+            yield return new WaitForSeconds(2.0f);
+        }
 
 
+        var num = rnd.Next(0, 3);
+        // 3. Abilities
+        if (num != 0)
+        {
+            EnemyAbilities();
+        }
+        // 4. Attack or Defend
+        else
+        {
+            EnemyAttackDefend();
+        }
+        PlayerTurn();
+        states = BattleState.PLAYERTURN;
+    }
 
-        
+    public void EnemyAttackDefend()
+    {
+        var num3 = rnd.Next(0, 9);
+        //-Attack-
+        if (num3 <= 7)
+        {
+            encounterTxt.text = enemyUnit.Unitname + " Attacks";
+            bool isDead = playerUnit.TakeDamage(enemyUnit.dmg);
+            playerHud.HpSet(playerUnit.currentHp);
+        }
+        //-Defend-
+        else
+        {
+            enemyUnit.isDefending = true;
+            encounterTxt.text = "Enemy Gets Into A Defencive Position!";
+        }
+    }
+
+    public void EnemyAbilities()
+    {
+        var num2 = rnd.Next(0, 5);
+
+        if (num2 >= 4)
+        {
+            //Fire Blast
+            if (enemyUnit.currentMp > enemyUnit.fireMpCost)
+            {
+                encounterTxt.text = "Enemy Used Fire Blast Successfully";
+                StartCoroutine(EnemyFireBlast());
+            }
+        }
+        if (num2 >= 2 && num2 < 4)
+        {
+            //Wind Cannon
+            if (enemyUnit.currentMp > enemyUnit.windMpCost)
+            {
+                encounterTxt.text = "Enemy Used Wind Cannon Successfully";
+                StartCoroutine(EnemyWindCannon());
+            }
+        }
+        if (num2 <= 1)
+        {
+            //Ice Pistol
+            if (enemyUnit.currentMp > enemyUnit.iceMpCost)
+            {
+                encounterTxt.text = "Enemy Used Ice Pistol Successfully";
+                StartCoroutine(EnemyIcePistol());
+            }
+        }
     }
 
     void PlayerTurn()
@@ -334,6 +363,8 @@ public class BattleSystems : MonoBehaviour
         }
     }
 
+
+    // --Buttons--
 
     // Action Buttons
     public void OnAttackButton()

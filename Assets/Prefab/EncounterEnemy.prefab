@@ -54,18 +54,25 @@ MonoBehaviour:
   Unitlvl: 1
   dmg: 10
   defendedDmg: 5
+  maxHp: 45
+  currentHp: 45
+  maxMp: 45
+  currentMp: 45
   fireBlastDmg: 15
   burningDmg: 3
   burningTurnsLeft: 0
+  fireMpCost: 15
   icePistolDmg: 15
   freezingDmg: 3
   freezingTurnsLeft: 0
-  maxHp: 45
-  currentHp: 45
+  iceMpCost: 15
+  BlownAwayTurnsLeft: 0
+  windMpCost: 15
+  healMpCost: 10
   isDefending: 0
   isOnFire: 0
   isBlownAway: 0
-  isSoaked: 0
+  isFrozen: 0
 --- !u!1 &5999023609250784219
 GameObject:
   m_ObjectHideFlags: 0

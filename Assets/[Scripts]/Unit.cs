@@ -9,16 +9,27 @@ public class Unit : MonoBehaviour
     public int defendedDmg = 2;
     public int maxHp;
     public int currentHp;
+    public int maxMp;
+    public int currentMp;
 
     [Header("Fire Info")]
     public int fireBlastDmg;
     public int burningDmg;
     public int burningTurnsLeft;
+    public int fireMpCost;
 
     [Header("Ice Info")]
     public int icePistolDmg;
     public int freezingDmg;
     public int freezingTurnsLeft;
+    public int iceMpCost;
+
+    [Header("Wind Info")]
+    public int BlownAwayTurnsLeft;
+    public int windMpCost;
+
+    [Header("Heal Info")]
+    public int healMpCost;
 
     [Header("Bool Checks")]
     public bool isDefending = false;
