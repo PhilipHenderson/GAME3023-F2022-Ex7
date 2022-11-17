@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/[Scenes]/DayWorld.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/[Scenes]/NightWorld.unity
+    guid: d1723a660d0a4e54f9ecf38c02c73b85
+  - enabled: 1
+    path: Assets/[Scenes]/MenuScreen.unity
+    guid: 98107826f21204541bcfd7d2b609c51d
+  m_configObjects: {}
