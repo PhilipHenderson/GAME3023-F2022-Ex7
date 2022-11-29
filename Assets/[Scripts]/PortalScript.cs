@@ -27,6 +27,7 @@ public class PortalScript : MonoBehaviour
         {
             Debug.Log("Portal Warping: " + traveller.gameObject.name);
             traveller.SetSpawn(targetSpawn);
+            traveller.onTrasportToNewScene.Invoke(SceneManager.GetSceneByName(tag));
             SceneManager.LoadScene(tag, LoadSceneMode.Single);
             Debug.Log("Should have loaded scene");
         }

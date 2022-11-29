@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class Traveller : MonoBehaviour
 {
+    public UnityEvent<Scene> onTrasportToNewScene;
+
     private string lastSpawn = "";
     public void SetSpawn(string spawn)
     {
@@ -44,6 +47,7 @@ public class Traveller : MonoBehaviour
                 throw new System.Exception("Could not find Spawn Point: " + lastSpawn);
             }
         }
+
     }
 
     private void EditorKillClones()
