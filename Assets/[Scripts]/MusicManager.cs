@@ -1,10 +1,6 @@
 //Singleton Music Manager class to handle playing out crossfading music, which persists 
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,13 +8,12 @@ public class MusicManager : MonoBehaviour
 {
     public enum TrackID
     {
-        TOWN,
         DAYWORLD,
-        NIGHTWORLD,
-        MAINMENU
+        NIGHTWORLD
     }
 
     [Tooltip("Track Order SHould Line up with trackID")]
+    [SerializeField]
     AudioClip[] tracks;
 
     //Hidden Constructor
@@ -31,8 +26,8 @@ public class MusicManager : MonoBehaviour
         {
             if(instance == null)
             {
-                instance = new MusicManager();
-                //SceneManager.sceneLoaded += instance.OnSceneLoaded();
+                instance = FindObjectOfType<MusicManager>();
+                SceneManager.sceneLoaded += instance.OnSceneLoaded;
             }
             return instance;
 
@@ -50,17 +45,16 @@ public class MusicManager : MonoBehaviour
     AudioSource musicSource2;
 
 
-
     void Start()
     {
         //On start, in inastance is null, this will set our original. if its aleady been set, this will return that one
         MusicManager original = Instance;
 
         //if i want to have a musicmanager living int he scene, i need to make sure only one stays at a time...
-        MusicManager[] managers = GameObject.FindObjectsOfType<MusicManager>();
+        MusicManager[] managers = FindObjectsOfType<MusicManager>();
         foreach (MusicManager manager in managers)
         {
-            if (manager != instance)
+            if (manager != original)
             {
                 Destroy(manager.gameObject);
                 
@@ -72,14 +66,39 @@ public class MusicManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
 
+
     }
 
+    void OnSceneLoaded(Scene newScene, LoadSceneMode loadMode)
+    {
+        //if (newScene.name == "MainMenu")
+        //{
+        //    CrossFadeTo(TrackID.MAINMENU);
+        //}
+        if (newScene.name == "DayWorld")
+        {
+            CrossFadeTo(TrackID.DAYWORLD);
+        }
+        if (newScene.name == "NightWorld")
+        {
+            CrossFadeTo(TrackID.NIGHTWORLD);
+        }
+        //if (newScene.name == "Town")
+        //{
+        //    CrossFadeTo(TrackID.TOWN);
+        //}
+    }
     //Add a mothod for :
     //1. playing a track immediatly
     //2. crossfading between current tracks and a new goal track
     //3. Fading out a track
     //4.Fading in a track
     //5. Dip-To-Black transition where current track fades to 0, then Goal track fades in from 0
+
+    /// <summary>
+    /// Stop everything and play on source 1
+    /// </summary>
+    /// <param name="whichTrackToPlay"></param>
 
     public void PlayTrackSolo(TrackID whichTrackToPlay)
     {
@@ -95,19 +114,17 @@ public class MusicManager : MonoBehaviour
     ///</summary>
     ///<param name="goalTrack"></param>
 
-    public void CrossFadeTo(TrackID goalTrack, float transitionDuration = 3.0f)
+    public void CrossFadeTo(TrackID goalTrack, float transitionDurationSec = 3.0f)
     {
         //old track will fade out new track will fade in
-        AudioSource oldTrack = null;
-        AudioSource newTrack = null;
+        AudioSource oldTrack = musicSource1;
+        AudioSource newTrack = musicSource2;
 
         if(musicSource1.isPlaying)
         {
             oldTrack = musicSource1;
             newTrack = musicSource2;
-        }
-
-        else if(musicSource2.isPlaying)
+        } else if (musicSource2.isPlaying)
         {
             oldTrack = musicSource2;
             newTrack = musicSource1;
@@ -116,27 +133,27 @@ public class MusicManager : MonoBehaviour
         newTrack.clip = tracks[(int)goalTrack];
         newTrack.Play();
 
-        StartCoroutine(CrossFadeCoroitine(oldTrack, newTrack,transitionDuration));
+        StartCoroutine(CrossFadeCoroitine(oldTrack, newTrack,transitionDurationSec));
     }
 
-    private IEnumerator CrossFadeCoroitine(AudioSource oldTrack, AudioSource newTrack, float transitionDuration)
+    private IEnumerator CrossFadeCoroitine(AudioSource oldTrack, AudioSource newTrack, float transitionDurationSec)
     {
         float time = 0.0f;
-        while (time < transitionDuration)
+        while (time < transitionDurationSec)
         {
-            float tValue = time / transitionDuration;
+            float tValue = time / transitionDurationSec;
 
             //volume from 0 to 1 over duration
             newTrack.volume = tValue;
             oldTrack.volume = 1.0f - tValue;
 
             time += Time.deltaTime;
-
             yield return new WaitForEndOfFrame();
 
         }
 
-
+        oldTrack.Stop();
+        oldTrack.volume = 0.3f;
 
     }
 }

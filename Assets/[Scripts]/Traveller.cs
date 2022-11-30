@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -18,9 +19,11 @@ public class Traveller : MonoBehaviour
 #if UNITY_EDITOR
         EditorKillClones();
 #endif
-        DontDestroyOnLoad(this); // this tells unitl that this game Ongect sholulf not be cleaned up with all
-
-        SceneManager.sceneLoaded += OnSceneLoadedAction;
+        if (!gameObject.IsDestroyed())
+        {
+            DontDestroyOnLoad(this); // this tells unitl that this game Ongect sholulf not be cleaned up with all
+            SceneManager.sceneLoaded += OnSceneLoadedAction;
+        }
     }
 
     void OnSceneLoadedAction(Scene scene, LoadSceneMode loadmode)
