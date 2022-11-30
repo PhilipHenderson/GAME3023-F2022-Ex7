@@ -2,10 +2,14 @@
 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class MusicManager : MonoBehaviour
 {
+    [SerializeField]
+    AudioMixer mainMixer;
+
     public enum TrackID
     {
         DAYWORLD,
@@ -24,7 +28,7 @@ public class MusicManager : MonoBehaviour
     {
         get
         {
-            if(instance == null)
+            if (instance == null)
             {
                 instance = FindObjectOfType<MusicManager>();
                 SceneManager.sceneLoaded += instance.OnSceneLoaded;
@@ -44,6 +48,8 @@ public class MusicManager : MonoBehaviour
     [SerializeField]
     AudioSource musicSource2;
 
+    [SerializeField]
+    AudioSource portalSoundSource;
 
     void Start()
     {
@@ -57,7 +63,7 @@ public class MusicManager : MonoBehaviour
             if (manager != original)
             {
                 Destroy(manager.gameObject);
-                
+
             }
         }
 
@@ -71,6 +77,7 @@ public class MusicManager : MonoBehaviour
 
     void OnSceneLoaded(Scene newScene, LoadSceneMode loadMode)
     {
+        portalSoundSource.Play();
         //if (newScene.name == "MainMenu")
         //{
         //    CrossFadeTo(TrackID.MAINMENU);
@@ -120,11 +127,12 @@ public class MusicManager : MonoBehaviour
         AudioSource oldTrack = musicSource1;
         AudioSource newTrack = musicSource2;
 
-        if(musicSource1.isPlaying)
+        if (musicSource1.isPlaying)
         {
             oldTrack = musicSource1;
             newTrack = musicSource2;
-        } else if (musicSource2.isPlaying)
+        }
+        else if (musicSource2.isPlaying)
         {
             oldTrack = musicSource2;
             newTrack = musicSource1;
@@ -133,7 +141,7 @@ public class MusicManager : MonoBehaviour
         newTrack.clip = tracks[(int)goalTrack];
         newTrack.Play();
 
-        StartCoroutine(CrossFadeCoroitine(oldTrack, newTrack,transitionDurationSec));
+        StartCoroutine(CrossFadeCoroitine(oldTrack, newTrack, transitionDurationSec));
     }
 
     private IEnumerator CrossFadeCoroitine(AudioSource oldTrack, AudioSource newTrack, float transitionDurationSec)
@@ -155,5 +163,20 @@ public class MusicManager : MonoBehaviour
         oldTrack.Stop();
         oldTrack.volume = 0.3f;
 
+    }
+
+    public void SetMasterVolume(float volumeDB)
+    {
+        mainMixer.SetFloat("MasterVolume", volumeDB);
+    }
+
+    public void SetMusicVolume(float volumeDB)
+    {
+        mainMixer.SetFloat("MusicVolume", volumeDB);
+    }
+
+    public void SetSFXVolume(float volumeDB)
+    {
+        mainMixer.SetFloat("SFXVolume", volumeDB);
     }
 }
